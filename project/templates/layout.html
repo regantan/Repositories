@@ -17,19 +17,20 @@
     </head>
     <body>
         <div class="jumbotron">
-            <h2 class="display-4">Ratemyuni</h2>
-            <p class="lead">University reviews created by students for students</p>
-            <hr class="my-4">
+            {% block jumbotron %}{% endblock %}
             <nav class="navbar navbar-expand-md navbar-light bg-light">
                 <ul class="navbar-nav sm-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home</a>
+                        <a class="nav-link" href="/project/templates/index.html">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Universities</a>
+                        <a class="nav-link" href="ratings.html">Universities</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Lecturers</a>
+                    <li class="nav-item" id="right">
+                        <a class="nav-link" href="login.html">Login</a>
+                    </li>
+                    <li class="nav-item" id="right">
+                        <a class="nav-link" href="register.html">Register</a>
                     </li>
                 </ul>
             </nav>
@@ -41,6 +42,7 @@
 
         <footer class="small text-center text-muted">
             Copyright &#169; ratemyuni.com
+            <a class="nav-link" href="about.html">About Us</a>
         </footer>
     </body>
 </html>
