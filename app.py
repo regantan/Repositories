@@ -2,7 +2,7 @@ import os
 import re
 
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -37,10 +37,20 @@ db = SQL("sqlite:///ratemyuni.db")
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
     # Shows homepage and asks user input for a university name
     return render_template("index.html")
+
+@app.route("/search")
+def search():
+    # Queries database on name of universities
+    q = request.args.get("q")
+    if not q:
+        universities = []
+    else:
+        universities = db.execute("SELECT * FROM universities WHERE name LIKE ? ORDER BY name", "%" + q + "%")
+    return jsonify(universities)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -68,7 +78,7 @@ def login():
 def register():
     # Allows user to register (method GET)
     if request.method == "GET":
-        render_template("register.html")
+        return render_template("register.html")
         
     # Process user input (method POST)
     else:
@@ -82,10 +92,11 @@ def register():
         
         # Ensures email is valid
         check = check_email(email)
-        if check["check"] != "safe":
+        print(check["check"])
+        if not check or check["check"] != "safe":
             return apology("Invalid Email", 400)
         rows = db.execute("SELECT username FROM users WHERE username = ?", email)
-        
+        print(rows)
         # Ensures email is unique
         if len(rows) != 0:
             return apology("Email Already Exists", 400)
@@ -107,4 +118,9 @@ def rating():
 @app.route("/university")
 def university():
     # Asks for university details in the case that it does not exist in database
+    return # TODO
+
+@app.route("/about")
+def about():
+    # shows about page
     return # TODO
