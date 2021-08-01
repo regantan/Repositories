@@ -12,20 +12,25 @@
 
 {% block main %}
     <input autofocus autocomplete="off" placeholder="Enter a name of a university in Malaysia" type="search">
-    <ul></ul>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <scipt>
-        let input = document.querySelector("input");
-        input.addEventListener("keyup", function() {
-            $.get("/search?q=" + input.value, function(universities) {
-                let html = "";
-                for (let id in universities)
-                {
-                    name = shows[id].name;
-                    html += "<li>" + name "</li>";
-                }
-                document.querySelector("ul").innerHTML = html;
+    <ul id="list"></ul>
+{% endblock %}
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let input = document.querySelector("input");
+            input.addEventListener("keyup", function() {
+                $.get("/search?q=" + input.value, function(universities) {
+                    let html = "";
+                    for (let id in universities)
+                    {
+                        name = universities[id].name;
+                        html += '<li>' + name + '</li>';
+                    }
+                    document.querySelector("#list").innerHTML = html;
+                });
             });
         });
-    </scipt>
+</script>
 {% endblock %}
