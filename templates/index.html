@@ -11,8 +11,11 @@
 {% endblock %}
 
 {% block main %}
-    <input autofocus autocomplete="off" placeholder="Enter a name of a university in Malaysia" type="search">
-    <ul id="list"></ul>
+    <p>Please enter the name of a university in Malaysia</p>
+    <div class="form-group">
+        <input autofocus autocomplete="off" class="form-control" placeholder="University Name" type="search">
+    </div>
+    <div class="d-grid gap-2" id="list"></div>
 {% endblock %}
 
 {% block script %}
@@ -26,11 +29,13 @@
                     for (let id in universities)
                     {
                         name = universities[id].name;
-                        html += '<li>' + name + '</li>';
+                        university_id = universities[id].id;
+                        html += '<a class="btn btn-light" href="/rating?q=' + university_id + '">' + name + '</a>';
                     }
                     document.querySelector("#list").innerHTML = html;
                 });
             });
+
         });
 </script>
 {% endblock %}

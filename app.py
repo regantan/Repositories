@@ -2,6 +2,7 @@ import os
 import re
 
 from cs50 import SQL
+from datetime import date
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from tempfile import mkdtemp
@@ -113,7 +114,77 @@ def register():
 @app.route("/rating", methods=["GET", "POST"])
 def rating():
     # Displays ratings for a university and asks for user input on ratings
-    return # TODO
+    if request.method == "GET":
+        universities = db.execute("SELECT * FROM universities")
+        q = request.args.get("q")
+        if not q:
+            flash("Please type in university name on the home page")
+            return redirect("/")
+        ratings = db.execute("SELECT * FROM ratings JOIN universities ON ratings.university_id = universities.id JOIN courses ON ratings.course_id = courses.id WHERE universities.id = ? ORDER BY date DESC", q)
+        if len(ratings) == 0:
+            flash("This university has no review yet!")
+            return redirect("/rate")
+        grade = 0; counter = 0
+        for rating in ratings:
+            grade += rating["overall"]
+            counter += 1
+        grade = float(grade) / counter
+        grade = round(grade, 2)
+        name = db.execute("SELECT * FROM universities WHERE id = ?", q)
+        return render_template("ratings.html", ratings=ratings, universities=universities, grade=grade, name=name[0]["name"])
+            
+    else:
+        name = request.form.get("name")
+        year = request.form.get("year")
+        comment = request.form.get("comment")
+        course = request.form.get("course")
+        status = request.form.get("status")
+        if not name or not year or not comment or not course or not status:
+            return apology("Missing information", 400)
+        if int(year) > date.today().year or int(year) < 2015:
+            return apology(f"Year entered must be between 2015 and {date.today().year}", 400)
+        university = db.execute("SELECT * FROM universities WHERE name LIKE ?", name)
+        if len(university) != 1:
+            return apology("Invalid university name", 400)
+        if re.search("[^a-zA-Z\s]", course) != None:
+            return apology("Course names should only contain letters", 400)
+        courses = db.execute("SELECT * FROM courses WHERE name LIKE ?", course)
+        if len(courses) == 0:
+            db.execute("INSERT INTO courses (name) VALUES (UPPER(?))", course)
+        elif len(courses) != 1:
+            message = "Did you mean: "
+            for row in courses:
+                message += row.name
+            return apology(message, 400)
+        courses = db.execute("SELECT * FROM courses WHERE name LIKE ?", course)
+        if status != "Completed" and status != "Ongoing" and status != "Dropped Out":
+            return apology("Status should only be 'Completed', 'Ongoing' or 'Dropped out'", 400)
+                
+        sliders = {}
+        sliders["facilities"] = request.form.get("facilities")
+        sliders["location"] = request.form.get("location")
+        sliders["safety"] = request.form.get("safety")
+        sliders["workload"] = request.form.get("workload")
+        sliders["food"] = request.form.get("food")
+        sliders["clubs"] = request.form.get("clubs")
+        sliders["happiness"] = request.form.get("happiness")
+        overall = 0; counter = 0
+        for row in sliders:
+            if re.search("/D", sliders[row]) != None or int(sliders[row]) < 1 or int(sliders[row]) > 5:
+                return apology("Slider ranges are only integers between 1 and 5", 400)
+            sliders[row] = int(sliders[row])
+            overall += sliders[row]
+            counter += 1
+        overall = float(overall) / counter
+        sliders["overall"] = round(overall, 2)
+        
+        id = db.execute('INSERT INTO ratings (date, university_id, course_id, facilities, location, safety, workload, food, clubs, happiness, status, year, comment, overall) VALUES (DATE("now"), (SELECT id FROM universities WHERE name LIKE ?), (SELECT id FROM courses WHERE name LIKE UPPER(?)) , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ', university[0]["name"], courses[0]["name"], sliders["facilities"], sliders["location"], sliders["safety"], sliders["workload"], sliders["food"], sliders["clubs"], sliders["happiness"], status, int(year), comment, overall)
+        return redirect(f"/rating?q={university[0]['id']}")
+
+@app.route("/rate")
+def rate():
+    universities = db.execute("SELECT * FROM universities")
+    return render_template("rate.html", universities=universities)
 
 @app.route("/university")
 def university():

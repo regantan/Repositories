@@ -5,13 +5,12 @@
 {% endblock title %}
 
 {% block main %}
-    <button class="btn btn-primary" type="button" id="create">Submit a rating</button>
-    <div id="form" style="display: none;">
-        <hr class="display-4">
+    <h5>Rate a university here</h5>
+    <div id="form" style="display: block;">
         <form action="/rating" method="post">
             <div class="form-group">
                 <label for="university_name" class="form-label">Enter a university name for which you want to submit a review.</label>
-                <input autofocus autocomplete="off" class="form-control" name="name" list="datalist" id="university_name" placeholder="Full university name" value='{{ name }}' type="text">
+                <input autofocus autocomplete="off" class="form-control" name="name" list="datalist" id="university_name" placeholder="Full university name" type="text">
                 <datalist id="datalist">
                 {% for university in universities %}
                     <option value="{{ university.name }}">
@@ -54,41 +53,4 @@
             <br><button class="btn btn-light" type="submit">Submit</button>
         </form>
     </div>
-    <hr class="my-4">
-    <h4>{{ name }}</h4>
-    <h5>Overall: {{ grade }}</h5>
-    <hr class="my-4">
-    {% for rating in ratings %}
-        <span>{{ rating.date }}</span>
-        <span>{{ rating.name }}</span>
-        <span>Graduation status: {{ rating.status }}</span>
-        <span>Entry year: {{ rating.year }}</span>
-        <span>Overall: {{ rating.overall }}</span>
-        <div class="row">
-            <div class="col">
-                <div>Facilities: {{ rating.facilities }}</div>
-                <div>Location: {{ rating.location }}</div>
-                <div>Safety: {{ rating.safety }}</div>
-                <div>Workload: {{ rating.workload }}</div>
-                <div>Food choices: {{ rating.food }}</div>
-                <div>Clubs: {{rating.clubs }}</div>
-                <div>happiness: {{ rating.happiness }}</div>
-            </div>
-            <div class="col">
-                <div>Additional comments:</div>
-                <dib>{{ rating.comment }}</dib>
-            </div>
-        </div>
-        <hr class="my-4">
-    {% endfor %}    
-
-{% endblock main %}
-
-{% block script %}
-    <script>
-        let button = document.querySelector("#create");
-        button.addEventListener("click", function() {
-            document.querySelector("#form").style.display = "block";
-        });;
-    </script>
-{% endblock script %}
+{% endblock %}

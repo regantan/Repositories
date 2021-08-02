@@ -10,3 +10,18 @@ h2 {
     font-weight: 400;
     font-size: 2rem;
 }
+
+input[type="number"] {
+    border-width: 1px;
+    box-sizing: border-box;
+    align-items: center;
+    border-color: rgb(133,133,133);
+    border-radius: 0px;
+    border-style: solid;
+    padding: 0px;
+}
+
+span {
+    padding: 1.5rem;
+    text-align: left;
+}
