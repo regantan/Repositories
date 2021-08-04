@@ -34,7 +34,8 @@ Session(app)
 # Configure cs50 Library to use sqlite database
 db = SQL("sqlite:///ratemyuni.db")
 
-# Make sure API key is set
+# Make sure API keys is set
+# API for email checker (reader)
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
@@ -113,53 +114,83 @@ def register():
 
 @app.route("/rating", methods=["GET", "POST"])
 def rating():
-    # Displays ratings for a university and asks for user input on ratings
+    
+    # Displays ratings for a university and asks for user input on ratings (GET method)
     if request.method == "GET":
         universities = db.execute("SELECT * FROM universities")
         q = request.args.get("q")
+        
+        # Ensures that a university name was inputted in the homepage
         if not q:
             flash("Please type in university name on the home page")
             return redirect("/")
-        ratings = db.execute("SELECT * FROM ratings JOIN universities ON ratings.university_id = universities.id JOIN courses ON ratings.course_id = courses.id WHERE universities.id = ? ORDER BY date DESC", q)
+        
+        # Redirects user to /rate if there are no ratings for a uni
+        ratings = db.execute("SELECT * FROM ratings JOIN universities ON ratings.university_id = universities.id JOIN courses ON ratings.course_id = courses.id WHERE universities.id = ? ORDER BY id DESC", q)
         if len(ratings) == 0:
             flash("This university has no review yet!")
             return redirect("/rate")
+        
+        # Finds the overall grade for a university
         grade = 0; counter = 0
         for rating in ratings:
             grade += rating["overall"]
             counter += 1
         grade = float(grade) / counter
-        grade = round(grade, 2)
+        grade = round(grade, 1)
+        
+        # returns page for the ratings
         name = db.execute("SELECT * FROM universities WHERE id = ?", q)
-        return render_template("ratings.html", ratings=ratings, universities=universities, grade=grade, name=name[0]["name"])
-            
+        return render_template("ratings.html", ratings=ratings, universities=universities, grade=grade, name=name[0]["name"], counter=counter)
+    
+    # Process form input from user (POST method)      
     else:
+        
+        # Requests neccessary info from http
         name = request.form.get("name")
         year = request.form.get("year")
         comment = request.form.get("comment")
         course = request.form.get("course")
         status = request.form.get("status")
+        
+        # Ensures text fields are filled in
         if not name or not year or not comment or not course or not status:
             return apology("Missing information", 400)
-        if int(year) > date.today().year or int(year) < 2015:
+        
+        # Ensures year provided is between 2015 and current year and in the correct format
+        if  re.search("\D", year) != None or int(year) > date.today().year or int(year) < 2015:
             return apology(f"Year entered must be between 2015 and {date.today().year}", 400)
+        
+        # Ensures name of university provided is in the database
         university = db.execute("SELECT * FROM universities WHERE name LIKE ?", name)
         if len(university) != 1:
             return apology("Invalid university name", 400)
+        
+        # Ensures course name only consists of letters
         if re.search("[^a-zA-Z\s]", course) != None:
             return apology("Course names should only contain letters", 400)
-        courses = db.execute("SELECT * FROM courses WHERE name LIKE ?", course)
+        courses = db.execute("SELECT * FROM courses WHERE name LIKE ?", "%" + course + "%")
+        
+        # Inserts course into database if it does not exist
         if len(courses) == 0:
             db.execute("INSERT INTO courses (name) VALUES (UPPER(?))", course)
+            
+        # Shows options if course name is ambiguous 
         elif len(courses) != 1:
             message = "Did you mean: "
-            for row in courses:
-                message += row.name
+            for i in range(len(courses)):
+                if i == len(courses) - 1:
+                    message += courses[i]["name"]
+                else:
+                    message += f"{courses[i]['name']}, " 
             return apology(message, 400)
-        courses = db.execute("SELECT * FROM courses WHERE name LIKE ?", course)
+        courses = db.execute("SELECT * FROM courses WHERE name LIKE ?", "%" + course + "%")
+        
+        # Ensures status is valid
         if status != "Completed" and status != "Ongoing" and status != "Dropped Out":
             return apology("Status should only be 'Completed', 'Ongoing' or 'Dropped out'", 400)
                 
+        # A dict of user inputs from the sliders 
         sliders = {}
         sliders["facilities"] = request.form.get("facilities")
         sliders["location"] = request.form.get("location")
@@ -168,28 +199,58 @@ def rating():
         sliders["food"] = request.form.get("food")
         sliders["clubs"] = request.form.get("clubs")
         sliders["happiness"] = request.form.get("happiness")
+        
+        # Finds the average grade from user input
         overall = 0; counter = 0
         for row in sliders:
-            if re.search("/D", sliders[row]) != None or int(sliders[row]) < 1 or int(sliders[row]) > 5:
+            if re.search("\D", sliders[row]) != None or int(sliders[row]) < 1 or int(sliders[row]) > 5:
                 return apology("Slider ranges are only integers between 1 and 5", 400)
             sliders[row] = int(sliders[row])
             overall += sliders[row]
             counter += 1
         overall = float(overall) / counter
-        sliders["overall"] = round(overall, 2)
-        
-        id = db.execute('INSERT INTO ratings (date, university_id, course_id, facilities, location, safety, workload, food, clubs, happiness, status, year, comment, overall) VALUES (DATE("now"), (SELECT id FROM universities WHERE name LIKE ?), (SELECT id FROM courses WHERE name LIKE UPPER(?)) , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ', university[0]["name"], courses[0]["name"], sliders["facilities"], sliders["location"], sliders["safety"], sliders["workload"], sliders["food"], sliders["clubs"], sliders["happiness"], status, int(year), comment, overall)
+        sliders["overall"] = round(overall, 1)
+        print(sliders["overall"])
+        # Inserts into database
+        db.execute('INSERT INTO ratings (date, university_id, course_id, facilities, location, safety, workload, food, clubs, happiness, status, year, comment, overall) VALUES (DATE("now"), (SELECT id FROM universities WHERE name LIKE ?), (SELECT id FROM courses WHERE name LIKE UPPER(?)) , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ', university[0]["name"], courses[0]["name"], sliders["facilities"], sliders["location"], sliders["safety"], sliders["workload"], sliders["food"], sliders["clubs"], sliders["happiness"], status, int(year), comment, sliders["overall"])
+        flash("Your rating has been submitted")
         return redirect(f"/rating?q={university[0]['id']}")
 
 @app.route("/rate")
 def rate():
+    # Renders an empty template to rate a university
     universities = db.execute("SELECT * FROM universities")
     return render_template("rate.html", universities=universities)
 
-@app.route("/university")
+@app.route("/university", methods=["GET", "POST"])
 def university():
     # Asks for university details in the case that it does not exist in database
-    return # TODO
+    if request.method == "GET":
+        universities = db.execute("SELECT * FROM universities ORDER BY name ASC")
+        return render_template("university.html", universities=universities)
+    else:
+        name = request.form.get("name")
+        url = request.form.get("url")
+        email = request.form.get("email")
+        if not name or not url or not email:
+            return apology("Forms not filled in completely", 400)
+        university = db.execute("SELECT * FROM universities WHERE website LIKE ?", "%" + url + "%")
+        if len(university) == 1:
+            flash(f"The university you submitted already exists in the system with name {university[0]['name']}")
+            return redirect(f"/rating?q={university[0]['id']}")
+        if len(university) > 1:
+            message = "Did you mean: "
+            for i in range(len(university)):
+                if i == len(university) - 1:
+                    message += university[i]['name']
+                else:
+                    message += f"{university[i]['name']}, "
+            return apology(message, 400)
+        check = check_email(email)
+        if not check or check["check"] != 'safe':
+            return apology("Invalid email", 400)
+        db.execute("Insert INTO universities (name, website) VALUES (?, ?)", name, url)
+        return redirect("/rating")
 
 @app.route("/about")
 def about():

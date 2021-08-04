@@ -50,7 +50,13 @@
                 <textarea class="form-control" name="comment" id="textarea" required placeholder="Leave yor comments here" type="text" style="height: 180px;" autocomplete="off" spellcheck="true"></textarea>
                 <label for="textarea">Leave your comments here...</label>
             </div>
-            <br><button class="btn btn-light" type="submit">Submit</button>
+            <div>Please note that this action is irreversible you cannot delete your rating after you submit it</div>
+            <button class="btn btn-light" type="submit">Submit</button>
         </form>
+        <form action="?" method="POST">
+      <div class="g-recaptcha" data-sitekey="6LdVkNsbAAAAAH_HQumy62V2aJKcJbBPP6uL02dr"></div>
+      <br/>
+      <input type="submit" value="Submit">
+    </form>
     </div>
 {% endblock %}

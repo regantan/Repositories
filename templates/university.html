@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Universities
+{% endblock title %}    
+
+{% block main %}
+    <h3>Here are the Universities included in our database</h3>
+    <div>Did we miss any universities?</div><br>
+    <button id="button" type="button" class="btn btn-primary">Contribute</button>
+    <div class="container" id="form" style="display: none;">
+        <form action="/university" method="post">
+            <div class="form-group">
+                <label for="uni_name" class="form-label">Enter the full name of a university in Malaysia</label><br>
+                <input autofocus autocomplete="off" class="form-control-md" id="uni_name" placeholder="Full university name" name="name" type="Text" required>
+            </div>
+            <div class="form-group">
+                <label for="url" class="form-label">Website URL for the university</label><br>
+                <input autocomplete="off" class="form-control-md" id="url" placeholder="URL" name="url" type="text" required>
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label><br>
+                <input class="form-control-md" id="email" placeholder="email" name="email" type="text" required>
+            </div>
+            <div>We will email you when the university is approved into our database. This process will take 1-2 days.</div>
+            <button class="btn btn-light" type="submit">submit</button>
+        </form>
+    </div>
+    <hr class="my-4">
+    <div>
+        <table class="table table-light table-bordered">
+            <thead>
+                <tr>
+                    <th>University</th>
+                    <th>Website</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for university in universities %}
+                    <tr>
+                        <td>{{ university.name }}</td>
+                        <td> <a href="{{ university.website }}" target="_blank" class="link-primary">{{ university.website }}</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr class="my-4">
+{% endblock main %}
+
+{% block script %}
+    <script>
+        let button = document.querySelector("#button");
+        button.addEventListener("click", function() {
+            document.querySelector("#form").style.display = "block";
+        });
+    </script>
+{% endblock %}

@@ -21,7 +21,13 @@ input[type="number"] {
     padding: 0px;
 }
 
-span {
-    padding: 1.5rem;
-    text-align: left;
+#report {
+    text-align: end;
+    bottom: 0px;
+    vertical-align: bottom;
+}
+
+form {
+    text-align: start;
+    padding-top: 1rem
 }

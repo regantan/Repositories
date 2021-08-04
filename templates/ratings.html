@@ -51,35 +51,51 @@
                 <textarea class="form-control" name="comment" id="textarea" required placeholder="Leave yor comments here" type="text" style="height: 180px;" autocomplete="off" spellcheck="true"></textarea>
                 <label for="textarea">Leave your comments here...</label>
             </div>
-            <br><button class="btn btn-light" type="submit">Submit</button>
+            <div>Please note that this action is irreversible you cannot delete your rating after you submit it</div>
+            <button class="btn btn-light" type="submit">Submit</button>
         </form>
     </div>
     <hr class="my-4">
     <h4>{{ name }}</h4>
-    <h5>Overall: {{ grade }}</h5>
+    <h5>Overall: {{ grade }} ({{ counter }})</h5>
     <hr class="my-4">
     {% for rating in ratings %}
-        <span>{{ rating.date }}</span>
-        <span>{{ rating.name }}</span>
-        <span>Graduation status: {{ rating.status }}</span>
-        <span>Entry year: {{ rating.year }}</span>
-        <span>Overall: {{ rating.overall }}</span>
-        <div class="row">
-            <div class="col">
-                <div>Facilities: {{ rating.facilities }}</div>
-                <div>Location: {{ rating.location }}</div>
-                <div>Safety: {{ rating.safety }}</div>
-                <div>Workload: {{ rating.workload }}</div>
-                <div>Food choices: {{ rating.food }}</div>
-                <div>Clubs: {{rating.clubs }}</div>
-                <div>happiness: {{ rating.happiness }}</div>
-            </div>
-            <div class="col">
-                <div>Additional comments:</div>
-                <dib>{{ rating.comment }}</dib>
-            </div>
+        <div class="container">
+            <table class="table table-light table-bordered">
+                <thead>
+                    <tr>
+                        <th>{{ rating.date }}</th>
+                        <th>{{ rating.name }}</th>
+                        <th>Entry year: {{ rating.year }}</th>
+                        <th>Status: {{ rating.status }}</th>
+                        <th>Overall: {{ rating.overall }}</th>
+                    </tr>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">
+                                <div>Facilities: {{ rating.facilities }}</div>
+                                <div>Location: {{ rating.location }}</div>
+                                <div>Safety: {{ rating.safety }}</div>
+                                <div>Workload: {{ rating.workload }}</div>
+                                <div>Food choices: {{ rating.food }}</div>
+                                <div>Clubs: {{rating.clubs }}</div>
+                                <div>happiness: {{ rating.happiness }}</div>
+                            </td>
+                            <td colspan="3">
+                                <div>Additional comments:</div>
+                                <div>{{ rating.comment }}</div>
+                                <div id="report">
+                                    <form action="/report">
+                                        <input style="display: none;" value="{{rating.id}}" name="ratings_id">
+                                        <button type="submit" class="btn btn-light">Report</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </thead>
+            </table>
         </div>
-        <hr class="my-4">
     {% endfor %}    
 
 {% endblock main %}
@@ -89,6 +105,6 @@
         let button = document.querySelector("#create");
         button.addEventListener("click", function() {
             document.querySelector("#form").style.display = "block";
-        });;
+        });
     </script>
 {% endblock script %}
