@@ -9,20 +9,20 @@
     <div id="form" style="display: none;">
         <hr class="display-4">
         <form action="/rating" method="post">
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="university_name" class="form-label">Enter a university name for which you want to submit a review.</label>
-                <input autofocus autocomplete="off" class="form-control" name="name" list="datalist" id="university_name" placeholder="Full university name" value='{{ name }}' type="text">
+                <input autocomplete="off" class="form-control" name="name" list="datalist" id="university_name" placeholder="Full university name" value='{{ name }}' type="text">
                 <datalist id="datalist">
                 {% for university in universities %}
                     <option value="{{ university.name }}">
                 {% endfor %}
                 </datalist>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="course_name" class="form-label">What course did you stude there?</label>
-                <input autocomplete="off" class="form-control" name="course" id="course_name" placeholder="Course name" type="text">
+                <input autocomplete="off" autofocus class="form-control" name="course" id="course_name" placeholder="Course name" type="text">
             </div>
-            <div class="slidecontainder">
+            <div class="slidecontainder mb-3">
                 <span>Facilities: </span>
                 <input class="slider" type="range" min="1" max="5" name="facilities"><br>
                 <span>Location: </span>
@@ -38,21 +38,27 @@
                 <span>Happiness: </span>
                 <input class="slider" type="range" min="1" max="5" name="happiness"><br>
             </div>
-            <label for="status" class="form-label">Have you completed your studies at this university?</label>
-            <select name="status" class="form-select-sm" id="status">
-                <option value="Completed" selected>Completed</option>
-                <option value="Ongoing">Ongoing</option>
-                <option value="Dropped Out">Dropped Out</option>
-            </select><br>
-            <label for="year" class="form-label">What year did you start attending at this university?</label>
-            <input type="number" class="form-control-sm" autocomplete="off" name="year" placeholder="YYYY"><br>
-            <label for="textarea" class="form-label">Feel free to express what you think of this university:</label>
-            <div class="form-floating">
-                <textarea class="form-control" name="comment" id="textarea" required placeholder="Leave yor comments here" type="text" style="height: 180px;" autocomplete="off" spellcheck="true"></textarea>
-                <label for="textarea">Leave your comments here...</label>
+            <div class="mb-3">
+                <label for="status" class="form-label">Have you completed your studies at this university?</label>
+                <select name="status" class="form-select-sm" id="status">
+                    <option value="Completed" selected>Completed</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Dropped Out">Dropped Out</option>
+                </select>
             </div>
-            <div>Please note that this action is irreversible you cannot delete your rating after you submit it</div>
-            <button class="btn btn-light" type="submit">Submit</button>
+            <div class="mb-3">
+                <label for="year" class="form-label">What year did you start attending at this university?</label>
+                <input type="number" class="form-control-md" autocomplete="off" name="year" placeholder="YYYY">
+            </div>
+            <div class="mb-3">
+                <label for="textarea" class="form-label">Feel free to express what you think of this university:</label>
+                <div class="form-floating">
+                    <textarea class="form-control" name="comment" id="textarea" required placeholder="Leave yor comments here" type="text" style="height: 180px;" autocomplete="off" spellcheck="true"></textarea>
+                    <label for="textarea">Leave your comments here...</label>
+                </div>
+                <div class="form-text">*Please note that this action is irreversible you cannot delete your rating after you submit it</div>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit</button>
         </form>
     </div>
     <hr class="my-4">
@@ -64,11 +70,11 @@
             <table class="table table-light table-bordered">
                 <thead>
                     <tr>
-                        <th>{{ rating.date }}</th>
-                        <th>{{ rating.name }}</th>
-                        <th>Entry year: {{ rating.year }}</th>
-                        <th>Status: {{ rating.status }}</th>
-                        <th>Overall: {{ rating.overall }}</th>
+                        <th id="row">{{ rating.date }}</th>
+                        <th id="row">{{ rating.name }}</th>
+                        <th id="row">Entry year: {{ rating.year }}</th>
+                        <th id="row">Status: {{ rating.status }}</th>
+                        <th id="row">Overall: {{ rating.overall }}</th>
                     </tr>
                     <tbody>
                         <tr>
@@ -85,9 +91,11 @@
                                 <div>Additional comments:</div>
                                 <div>{{ rating.comment }}</div>
                                 <div id="report">
-                                    <form action="/report">
-                                        <input style="display: none;" value="{{rating.id}}" name="ratings_id">
-                                        <button type="submit" class="btn btn-light">Report</button>
+                                    <form action="/report" method="get">
+                                        <input style="display: none;" value="{{rating.ratings_id}}" name="ratings_id">
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-light" id="report">Report</button>
+                                        </div>
                                     </form>
                                 </div>
                             </td>

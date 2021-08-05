@@ -1,0 +1,37 @@
+{% extends "staff.html" %}
+
+{% block title %}
+    View Reports
+{% endblock title %}
+
+{% block main %}
+    <table class="table table-light table-bordered">
+        <thead>
+            <tr>
+                <th id="row">ID</th>
+                <th id="row">Reason</th>
+                <th id="row">Report Comments</th>
+                <th id="row">Rating ID</th>
+                <th id="row">Rating Comments</th>
+                <th id="row">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+                <tr>
+                    <td>{{ report.id }}</td>
+                    <td>{{ report.reason }}</td>
+                    <td>{{ report.report_comment }}</td>
+                    <td>{{ report.ratings_id }}</td>
+                    <td>{{ report.comment }}</td>
+                    <td>
+                        <form action="/view-reports" method="post">
+                            <input style="display: none;" name="id" value="{{report.id}}" type="number">
+                            <button type="submit" class="btn btn-primary">Seen</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock main %}

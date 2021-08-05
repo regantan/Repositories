@@ -6,10 +6,10 @@ from datetime import date
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from tempfile import mkdtemp
-from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
+from werkzeug.exceptions import MethodNotAllowed, default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import check_email, apology
+from helpers import check_email, apology, login_required
 
 # Configure application
 app = Flask(__name__)
@@ -63,20 +63,21 @@ def login():
         return render_template("login.html")
     
     else:
-        email = request.form.get("email")
+        username = request.form.get("username")
         password = request.form.get("password")
 
-        if not email or not password:
+        if not username or not password:
             return apology("Missing Email/Password", 400)
-        rows = db.execute("SELECT * FROM users WHERE username = ?", email)
+        rows = db.execute("SELECT * FROM users WHERE username = ?", username)
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             return apology("Invalid Email/Password", 400)
         
         session["user_id"] = rows[0]["id"]
         flash("Successfully Logged In")
-        return redirect("/")
+        return redirect("/staff")
 
 @app.route("/register", methods=["GET", "POST"])
+@login_required
 def register():
     # Allows user to register (method GET)
     if request.method == "GET":
@@ -84,24 +85,17 @@ def register():
         
     # Process user input (method POST)
     else:
-        email = request.form.get("username")
+        username = request.form.get("username")
         password = request.form.get("password")
         confirmation = request.form.get("confirm_password")
         
         # Ensure email and passwords are typed in
-        if not email or not password or not confirmation:
+        if not username or not password or not confirmation:
             return apology("Missing Email/Password", 400)
-        
-        # Ensures email is valid
-        check = check_email(email)
-        print(check["check"])
-        if not check or check["check"] != "safe":
-            return apology("Invalid Email", 400)
-        rows = db.execute("SELECT username FROM users WHERE username = ?", email)
-        print(rows)
+        rows = db.execute("SELECT username FROM users WHERE username = ?", username)
         # Ensures email is unique
         if len(rows) != 0:
-            return apology("Email Already Exists", 400)
+            return apology("Username Already Exists", 400)
         
         # Ensures passwords are identical
         if password != confirmation:
@@ -109,7 +103,7 @@ def register():
         
         # Insert info into database
         password_hash = generate_password_hash(password)
-        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", email, password_hash)
+        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, password_hash)
         return redirect("/login")
 
 @app.route("/rating", methods=["GET", "POST"])
@@ -126,7 +120,7 @@ def rating():
             return redirect("/")
         
         # Redirects user to /rate if there are no ratings for a uni
-        ratings = db.execute("SELECT * FROM ratings JOIN universities ON ratings.university_id = universities.id JOIN courses ON ratings.course_id = courses.id WHERE universities.id = ? ORDER BY id DESC", q)
+        ratings = db.execute("SELECT * FROM ratings JOIN universities ON ratings.university_id = universities.id JOIN courses ON ratings.course_id = courses.id WHERE universities.id = ? AND ratings_id NOT IN (SELECT ratings_id FROM report) ORDER BY ratings_id DESC", q)
         if len(ratings) == 0:
             flash("This university has no review yet!")
             return redirect("/rate")
@@ -224,20 +218,28 @@ def rate():
 
 @app.route("/university", methods=["GET", "POST"])
 def university():
-    # Asks for university details in the case that it does not exist in database
+    # Asks for university details in the case that it does not exist in database (get method)
     if request.method == "GET":
         universities = db.execute("SELECT * FROM universities ORDER BY name ASC")
         return render_template("university.html", universities=universities)
+    
+    # Process user input (post method)
     else:
         name = request.form.get("name")
         url = request.form.get("url")
         email = request.form.get("email")
+        
+        # Ensure that form is filled in
         if not name or not url or not email:
             return apology("Forms not filled in completely", 400)
+        
+        # Ensure that university website does not exist in the database already
         university = db.execute("SELECT * FROM universities WHERE website LIKE ?", "%" + url + "%")
         if len(university) == 1:
             flash(f"The university you submitted already exists in the system with name {university[0]['name']}")
             return redirect(f"/rating?q={university[0]['id']}")
+        
+        # Ensures user input is not ambiguous
         if len(university) > 1:
             message = "Did you mean: "
             for i in range(len(university)):
@@ -246,13 +248,122 @@ def university():
                 else:
                     message += f"{university[i]['name']}, "
             return apology(message, 400)
+        
+        # Ensures user inputted email is valid
         check = check_email(email)
-        if not check or check["check"] != 'safe':
+        if not check or check["check"] != 'safe' and check["check"] != 'risky':
             return apology("Invalid email", 400)
+        
+        # Insert user input into database
         db.execute("Insert INTO universities (name, website) VALUES (?, ?)", name, url)
-        return redirect("/rating")
+        flash(f"Your university has been inserted into the system. You can start rating for {name} now!")
+        return redirect("/rate")
 
-@app.route("/about")
+@app.route("/report", methods=["GET", "POST"])
+def report():
+    
+    # Load page for a report form (get method)
+    if request.method == "GET":
+        q = request.args.get("ratings_id")
+        return render_template("report.html", q=q)
+    # Process form input (post method)
+    else:
+        id = request.form.get("id")
+        email = request.form.get("email")
+        reason = request.form.get("reason")
+        comment = request.form.get("comment")
+        
+        # Ensure id is in the form
+        if not id:
+            flash("An error occured please try again now")
+            return render_template("/")
+        
+        # Ensure email and reason are filled in
+        if not email or not reason:
+            flash("Please fill in email and reason")
+            return redirect(f"/report?ratings_id={id}")
+        
+        # Ensure email is valid
+        check = check_email(email)
+        if check["check"] != "safe":
+            flash("Invalid email. Please try again")
+            return redirect(f"/report?q={id}")
+        
+        # Insert data into database
+        db.execute("INSERT INTO report (ratings_id, reason, comment, bool) VALUES (?, ?, ?, 0)", int(id), reason, comment)
+        ratings_id = db.execute("SELECT university_id FROM ratings WHERE ratings_id = ?", id)
+        flash("Your report has been noted, thank you for your contribution")    
+        return redirect(f"/rating?q={ratings_id[0]['university_id']}")
+        
+@app.route("/contact", methods=["GET", "POST"])
 def about():
-    # shows about page
-    return # TODO
+    # shows about page (get method)
+    if request.method == "GET":
+        return render_template("contact.html")
+    
+    # Process contact form (post method)
+    else:
+        email = request.form.get("email")
+        subject = request.form.get("subject")
+        comment = request.form.get("comment")
+        
+        # Ensure form is filled out
+        if not email or not subject or not comment:
+            flash("Email, subject field and comments field should be filled out.")
+            return redirect("/contact")
+        
+        # Ensure email is valid
+        check = check_email(email)
+        if check["check"] != 'safe':
+            flash("Please provide a valid email.")
+            return redirect("/contact")
+        
+        # Insert into database
+        db.execute("INSERT INTO contact (email, subject, comment, bool) VALUES (?, ?, ?, 0)", email, subject, comment)
+        flash("Thank you for contacting us. We will get in touch with you as soon as possible.")
+        return redirect("/")
+    
+@app.route("/staff")
+@login_required
+def staff():
+    
+    # render staff template after loggin in
+    return render_template("staff.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    
+    # Log user out
+    session.clear()
+    return redirect("/")
+
+@app.route("/view-reports", methods=["GET", "POST"])
+@login_required
+def view_reports():
+    
+    # Shows reports to be checked (get method)
+    if request.method == "GET":
+        reports = db.execute("SELECT * FROM report JOIN ratings ON report.ratings_id = ratings.ratings_id where bool = 0")
+        return render_template("view_reports.html", reports=reports)
+    
+    # Marks a report after it is checked (post method)
+    else:
+        id = request.form.get("id")
+        db.execute("UPDATE report SET bool = 1 WHERE id = ?", id)
+        return redirect("/view-reports")
+
+@app.route("/view-contacts", methods=["GET", "POST"])
+@login_required
+def view_contacts():
+    
+    # Shows contact forms that have not been viewed
+    if request.method == "GET":
+        contacts = db.execute("SELECT * FROM contact WHERE bool = 0")
+        return render_template("view_contacts.html", contacts=contacts)
+    
+    # Marks contact forms that have veen viewed
+    else:
+        id = request.form.get("id")
+        db.execute("UPDATE contact SET bool = 1 WHERE id = ?", id)
+        return redirect("/view-contacts")

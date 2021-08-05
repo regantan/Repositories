@@ -24,20 +24,19 @@
             <nav class="navbar navbar-expand-md navbar-light bg-light">
                 <ul class="navbar-nav sm-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="/">Ratemyuni</a>
+                        <a class="nav-link" href="/view-reports">Reports</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/rate">Rate</a>
+                        <a class="nav-link" href="/view-contacts">Contacts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav justify-content-end">
                     <li class="nav-item">
-                        <a class="nav-link" href="/university">Universities</a>
+                        <a class="nav-link" href="/logout">Log Out</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
-                    </li>
-                    {% block navbar %}{% endblock navbar %}
                 </ul>
             </nav>
         </div>
@@ -54,7 +53,6 @@
 
         <footer class="small text-center text-muted">
             Copyright &#169; ratemyuni.com
-            <a class="nav-link" href="/contact">Contact</a>
         </footer>
         {% block script %}{% endblock %}
     </body>

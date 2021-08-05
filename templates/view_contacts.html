@@ -1,0 +1,35 @@
+{% extends "staff.html" %}
+
+{% block title %}
+    View Contacts
+{% endblock title %}
+
+{% block main %}
+    <table class="table table-light table-bordered">
+        <thead>
+            <tr>
+                <th id="row">Email</th>
+                <th id="row">Subject</th>
+                <th id="row">Comment</th>
+                <th id="row">Action</th>
+            </trd
+        </thead>
+        <tbody>
+            {% for contact in contacts %}
+            <tr>
+                <td>{{ contact.email }}</td>
+                <td>{{ contact.subject }}</td>
+                <td>{{ contact.comment }}</td>
+                <td>
+                    <form action="/view-contacts" method="post">
+                        <input style="display: none;" type="number" name="id" value="{{ contact.id }}">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Seen</button>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock main %}

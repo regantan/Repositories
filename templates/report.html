@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Report
+{% endblock title %}    
+
+{% block main %}
+    <form action="/report" method="post">
+        <div style="display: none;" class="mb-3">
+            <label class="form-label" for="report_id">Rating ID: </label>
+            <input class="form-control-sm" value="{{q}}" type="number" name="id" id="report_id" placeholder="Rating ID">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="email">Email: </label><br>
+            <input class="form-control-md" type="text" name="email" id="email" placeholder="Email" autofocus autocomplete="off" required>
+            <div class="form-text">Your email is for validation purposes only, we will not save your email on our database. This will act as a barrier for useful reports only.</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="reason">Reason: </label><br>
+            <select class="form-select-md" name="reason" id="reason">
+                <option value="inaccurate" selected>Inaccuracy</option>
+                <option value="profanity">Profanity</option>
+                <option value="inappropriate">Inappropriate</option>
+            </select>
+        </div>
+        <div class="form-floating">
+            <textarea class="form-control" name="textarea" placeholder="Additional comments..." id="comment" style="height: 180px; width: 100%;" autocomplete="off" spellcheck="true"></textarea>
+            <label for="textarea">Additional comments...</label>
+        </div><br>
+        <button type="submit" class="btn btn-primary">Report</button>
+    </form>
+{% endblock main %} 

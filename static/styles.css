@@ -18,16 +18,20 @@ input[type="number"] {
     border-color: rgb(133,133,133);
     border-radius: 0px;
     border-style: solid;
-    padding: 0px;
-}
-
-#report {
-    text-align: end;
-    bottom: 0px;
-    vertical-align: bottom;
 }
 
 form {
     text-align: start;
     padding-top: 1rem
+}
+
+.col-12 {
+    text-align: end;
+    padding-top: 10px;
+}
+
+#row {
+    width: 20%;
+    text-align: center;
+    vertical-align: middle;
 }

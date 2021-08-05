@@ -5,10 +5,10 @@
 {% endblock title %}
 
 {% block main %}
-    <h5>Rate a university here</h5>
+    <h4>Rate a university here</h4>
     <div id="form" style="display: block;">
         <form action="/rating" method="post">
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="university_name" class="form-label">Enter a university name for which you want to submit a review.</label>
                 <input autofocus autocomplete="off" class="form-control" name="name" list="datalist" id="university_name" placeholder="Full university name" type="text">
                 <datalist id="datalist">
@@ -17,11 +17,11 @@
                 {% endfor %}
                 </datalist>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="course_name" class="form-label">What course did you stude there?</label>
                 <input autocomplete="off" class="form-control" name="course" id="course_name" placeholder="Course name" type="text">
             </div>
-            <div class="slidecontainder">
+ <div class="slidecontainder mb-3">
                 <span>Facilities: </span>
                 <input class="slider" type="range" min="1" max="5" name="facilities"><br>
                 <span>Location: </span>
@@ -37,26 +37,29 @@
                 <span>Happiness: </span>
                 <input class="slider" type="range" min="1" max="5" name="happiness"><br>
             </div>
-            <label for="status" class="form-label">Have you completed your studies at this university?</label>
-            <select name="status" class="form-select-sm" id="status">
-                <option value="Completed" selected>Completed</option>
-                <option value="Ongoing">Ongoing</option>
-                <option value="Dropped Out">Dropped Out</option>
-            </select><br>
-            <label for="year" class="form-label">What year did you start attending at this university?</label>
-            <input type="number" class="form-control-sm" autocomplete="off" name="year" placeholder="YYYY"><br>
-            <label for="textarea" class="form-label">Feel free to express what you think of this university:</label>
-            <div class="form-floating">
-                <textarea class="form-control" name="comment" id="textarea" required placeholder="Leave yor comments here" type="text" style="height: 180px;" autocomplete="off" spellcheck="true"></textarea>
-                <label for="textarea">Leave your comments here...</label>
+            <div class="mb-3">
+                <label for="status" class="form-label">Have you completed your studies at this university?</label>
+                <select name="status" class="form-select-md" id="status">
+                    <option value="Completed" selected>Completed</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Dropped Out">Dropped Out</option>
+                </select>
             </div>
-            <div>Please note that this action is irreversible you cannot delete your rating after you submit it</div>
-            <button class="btn btn-light" type="submit">Submit</button>
+            <div class="mb-3">
+                <label for="year" class="form-label">What year did you start attending at this university?</label>
+                <input type="number" class="form-control-md" autocomplete="off" name="year" placeholder="YYYY">
+            </div>
+            <div class="mb-3">
+                <label for="textarea" class="form-label">Feel free to express what you think of this university:</label>
+                <div class="form-floating">
+                    <textarea class="form-control" name="comment" id="textarea" required placeholder="Leave yor comments here" type="text" style="height: 180px;" autocomplete="off" spellcheck="true"></textarea>
+                    <label for="textarea">Leave your comments here...</label>
+                </div>
+                <div class="form-text">*Please note that this action is irreversible you cannot delete your rating after you submit it</div>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
         </form>
-        <form action="?" method="POST">
-      <div class="g-recaptcha" data-sitekey="6LdVkNsbAAAAAH_HQumy62V2aJKcJbBPP6uL02dr"></div>
-      <br/>
-      <input type="submit" value="Submit">
-    </form>
     </div>
 {% endblock %}

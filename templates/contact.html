@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Contact
+{% endblock title %}
+
+{% block main %}
+    <h4>Contact Us</h4>
+    <form action="/contact" method="post">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input class="form-control" autocomplete="off" autofocus type="text" placeholder="example@mail.com" name="email" id="email" required> 
+            <div class="form-text">*This email will be stored in our database for contacting purposes</div>
+        </div>
+        <div class="mb-2">
+            <label for="subject" class="form-label">Subject</label>
+            <input class="form-control" autocomplete="off" type="text" placeholder="Subject title" name="subject" id="subject" required>
+        </div>
+        <div class="form-floating">
+            <textarea class="form-control" name="comment" placeholder="Additional Comments..." id="textarea" spellcheck="true" style="height: 180px;" required></textarea>
+            <label for="textarea">Additional Comments</label>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{% endblock main %}
