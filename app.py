@@ -70,7 +70,7 @@ def login():
             return apology("Missing Email/Password", 400)
         rows = db.execute("SELECT * FROM users WHERE username = ?", username)
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
-            return apology("Invalid Email/Password", 400)
+            return apology("Invalid Username/Password", 400)
         
         session["user_id"] = rows[0]["id"]
         flash("Successfully Logged In")
@@ -287,10 +287,10 @@ def report():
         check = check_email(email)
         if check["check"] != "safe":
             flash("Invalid email. Please try again")
-            return redirect(f"/report?q={id}")
+            return redirect("/")
         
         # Insert data into database
-        db.execute("INSERT INTO report (ratings_id, reason, comment, bool) VALUES (?, ?, ?, 0)", int(id), reason, comment)
+        db.execute("INSERT INTO report (ratings_id, reason, report_comment, bool) VALUES (?, ?, ?, 0)", int(id), reason, comment)
         ratings_id = db.execute("SELECT university_id FROM ratings WHERE ratings_id = ?", id)
         flash("Your report has been noted, thank you for your contribution")    
         return redirect(f"/rating?q={ratings_id[0]['university_id']}")
