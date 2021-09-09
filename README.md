@@ -24,4 +24,4 @@ to type in their email but is solely to run through and email checker API. This 
 however will store user's email to contact back.
 
 Staff members will be able to log in to the website and can view contact forms and reports submitted by users that had not been processed and are able to press a button named "Seen" 
-to mark that the form has been processed. After loggin in staff members can also register other members to the page to log in next time.
+to mark that the form has been processed. After logging in staff members can also register other members to the page to log in next time.
