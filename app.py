@@ -11,6 +11,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import check_email, apology, login_required
 
+# Run Application using cmd: flask run
+# Set API Key using cmd: export API_KEY = ''
+
 # Configure application
 app = Flask(__name__)
 
@@ -35,7 +38,7 @@ Session(app)
 db = SQL("sqlite:///ratemyuni.db")
 
 # Make sure API keys is set
-# API for email checker (reader)
+# API for email checker (reader) IEX
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
